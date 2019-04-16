@@ -50,8 +50,16 @@ func (c *FortiSDKClient) CreateSystemVdomSetting(params *JSONSystemVdomSetting) 
 	bytes := bytes.NewBuffer(locJSON)
 	req := c.NewRequest(HTTPMethod, path, nil, bytes)
 	err = req.Send()
+	if err != nil || req.HTTPResponse == nil {
+		err = fmt.Errorf("cannot send request")
+		return
+	}
 
 	body, err := ioutil.ReadAll(req.HTTPResponse.Body)
+	if err != nil || body == nil {
+		err = fmt.Errorf("cannot get response body")
+		return
+	}
 
 	var result map[string]interface{}
 	json.Unmarshal([]byte(string(body)), &result)
@@ -72,6 +80,13 @@ func (c *FortiSDKClient) CreateSystemVdomSetting(params *JSONSystemVdomSetting) 
 				} else {
 					err = fmt.Errorf("status is %s and error no is not found", result["status"])
 				}
+
+				if result["http_status"] != nil {
+					err = fmt.Errorf("%s and http_status no is %.0f", err, result["http_status"])
+				} else {
+					err = fmt.Errorf("%s and and http_status no is not found", err)
+				}
+
 				return
 			}
 			output.Status = result["status"].(string)
@@ -108,8 +123,16 @@ func (c *FortiSDKClient) UpdateSystemVdomSetting(params *JSONSystemVdomSetting, 
 	bytes := bytes.NewBuffer(locJSON)
 	req := c.NewRequest(HTTPMethod, path, nil, bytes)
 	err = req.Send()
+	if err != nil || req.HTTPResponse == nil {
+		err = fmt.Errorf("cannot send request")
+		return
+	}
 
 	body, err := ioutil.ReadAll(req.HTTPResponse.Body)
+	if err != nil || body == nil {
+		err = fmt.Errorf("cannot get response body")
+		return
+	}
 	log.Printf("FOS-fortios response: %s", string(body))
 
 	var result map[string]interface{}
@@ -131,6 +154,13 @@ func (c *FortiSDKClient) UpdateSystemVdomSetting(params *JSONSystemVdomSetting, 
 				} else {
 					err = fmt.Errorf("status is %s and error no is not found", result["status"])
 				}
+
+				if result["http_status"] != nil {
+					err = fmt.Errorf("%s and http_status no is %.0f", err, result["http_status"])
+				} else {
+					err = fmt.Errorf("%s and and http_status no is not found", err)
+				}
+
 				return
 			}
 			output.Status = result["status"].(string)
@@ -159,8 +189,16 @@ func (c *FortiSDKClient) DeleteSystemVdomSetting(mkey string) (err error) {
 
 	req := c.NewRequest(HTTPMethod, path, nil, nil)
 	err = req.Send()
+	if err != nil || req.HTTPResponse == nil {
+		err = fmt.Errorf("cannot send request")
+		return
+	}
 
 	body, err := ioutil.ReadAll(req.HTTPResponse.Body)
+	if err != nil || body == nil {
+		err = fmt.Errorf("cannot get response body")
+		return
+	}
 	log.Printf("FOS-fortios response: %s", string(body))
 
 	var result map[string]interface{}
@@ -180,6 +218,13 @@ func (c *FortiSDKClient) DeleteSystemVdomSetting(mkey string) (err error) {
 			} else {
 				err = fmt.Errorf("status is %s and error no is not found", result["status"])
 			}
+
+			if result["http_status"] != nil {
+				err = fmt.Errorf("%s and http_status no is %.0f", err, result["http_status"])
+			} else {
+				err = fmt.Errorf("%s and and http_status no is not found", err)
+			}
+
 			return
 		}
 
@@ -201,13 +246,22 @@ func (c *FortiSDKClient) ReadSystemVdomSetting(mkey string) (output *JSONSystemV
 	path := "/api/v2/cmdb/system/vdom"
 	path += "/" + mkey
 
+	output = &JSONSystemVdomSetting{}
+
 	req := c.NewRequest(HTTPMethod, path, nil, nil)
 	err = req.Send()
+	if err != nil || req.HTTPResponse == nil {
+		err = fmt.Errorf("cannot send request")
+		return
+	}
 
 	body, err := ioutil.ReadAll(req.HTTPResponse.Body)
+	if err != nil || body == nil {
+		err = fmt.Errorf("cannot get response body")
+		return
+	}
 	log.Printf("FOS-fortios reading response: %s", string(body))
 
-	output = &JSONSystemVdomSetting{}
 	var result map[string]interface{}
 	json.Unmarshal([]byte(string(body)), &result)
 
@@ -235,6 +289,13 @@ func (c *FortiSDKClient) ReadSystemVdomSetting(mkey string) (output *JSONSystemV
 			} else {
 				err = fmt.Errorf("status is %s and error no is not found", result["status"])
 			}
+
+			if result["http_status"] != nil {
+				err = fmt.Errorf("%s and http_status no is %.0f", err, result["http_status"])
+			} else {
+				err = fmt.Errorf("%s and and http_status no is not found", err)
+			}
+
 			return
 		}
 

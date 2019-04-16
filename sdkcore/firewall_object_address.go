@@ -79,8 +79,16 @@ func (c *FortiSDKClient) CreateFirewallObjectAddress(params *JSONFirewallObjectA
 	bytes := bytes.NewBuffer(locJSON)
 	req := c.NewRequest(HTTPMethod, path, nil, bytes)
 	err = req.Send()
+	if err != nil || req.HTTPResponse == nil {
+		err = fmt.Errorf("cannot send request")
+		return
+	}
 
 	body, err := ioutil.ReadAll(req.HTTPResponse.Body)
+	if err != nil || body == nil {
+		err = fmt.Errorf("cannot get response body")
+		return
+	}
 
 	var result map[string]interface{}
 	json.Unmarshal([]byte(string(body)), &result)
@@ -101,6 +109,13 @@ func (c *FortiSDKClient) CreateFirewallObjectAddress(params *JSONFirewallObjectA
 				} else {
 					err = fmt.Errorf("status is %s and error no is not found", result["status"])
 				}
+
+				if result["http_status"] != nil {
+					err = fmt.Errorf("%s and http_status no is %.0f", err, result["http_status"])
+				} else {
+					err = fmt.Errorf("%s and and http_status no is not found", err)
+				}
+
 				return
 			}
 			output.Status = result["status"].(string)
@@ -137,8 +152,16 @@ func (c *FortiSDKClient) UpdateFirewallObjectAddress(params *JSONFirewallObjectA
 	bytes := bytes.NewBuffer(locJSON)
 	req := c.NewRequest(HTTPMethod, path, nil, bytes)
 	err = req.Send()
+	if err != nil || req.HTTPResponse == nil {
+		err = fmt.Errorf("cannot send request")
+		return
+	}
 
 	body, err := ioutil.ReadAll(req.HTTPResponse.Body)
+	if err != nil || body == nil {
+		err = fmt.Errorf("cannot get response body")
+		return
+	}
 	log.Printf("FOS-fortios response: %s", string(body))
 
 	var result map[string]interface{}
@@ -160,6 +183,13 @@ func (c *FortiSDKClient) UpdateFirewallObjectAddress(params *JSONFirewallObjectA
 				} else {
 					err = fmt.Errorf("status is %s and error no is not found", result["status"])
 				}
+
+				if result["http_status"] != nil {
+					err = fmt.Errorf("%s and http_status no is %.0f", err, result["http_status"])
+				} else {
+					err = fmt.Errorf("%s and and http_status no is not found", err)
+				}
+
 				return
 			}
 			output.Status = result["status"].(string)
@@ -188,8 +218,16 @@ func (c *FortiSDKClient) DeleteFirewallObjectAddress(mkey string) (err error) {
 
 	req := c.NewRequest(HTTPMethod, path, nil, nil)
 	err = req.Send()
+	if err != nil || req.HTTPResponse == nil {
+		err = fmt.Errorf("cannot send request")
+		return
+	}
 
 	body, err := ioutil.ReadAll(req.HTTPResponse.Body)
+	if err != nil || body == nil {
+		err = fmt.Errorf("cannot get response body")
+		return
+	}
 	log.Printf("FOS-fortios response: %s", string(body))
 
 	var result map[string]interface{}
@@ -209,6 +247,13 @@ func (c *FortiSDKClient) DeleteFirewallObjectAddress(mkey string) (err error) {
 			} else {
 				err = fmt.Errorf("status is %s and error no is not found", result["status"])
 			}
+
+			if result["http_status"] != nil {
+				err = fmt.Errorf("%s and http_status no is %.0f", err, result["http_status"])
+			} else {
+				err = fmt.Errorf("%s and and http_status no is not found", err)
+			}
+
 			return
 		}
 
@@ -230,12 +275,6 @@ func (c *FortiSDKClient) ReadFirewallObjectAddress(mkey string) (output *JSONFir
 	path := "/api/v2/cmdb/firewall/address"
 	path += "/" + mkey
 
-	req := c.NewRequest(HTTPMethod, path, nil, nil)
-	err = req.Send()
-
-	body, err := ioutil.ReadAll(req.HTTPResponse.Body)
-	log.Printf("FOS-fortios reading response: %s", string(body))
-
 	j1 := JSONFirewallObjectAddressCommon{}
 	j2 := JSONFirewallObjectAddressIPRange{}
 	j3 := JSONFirewallObjectAddressCountry{}
@@ -249,6 +288,20 @@ func (c *FortiSDKClient) ReadFirewallObjectAddress(mkey string) (output *JSONFir
 		JSONFirewallObjectAddressFqdn:    &j4,
 		JSONFirewallObjectAddressIPMask:  &j5,
 	}
+
+	req := c.NewRequest(HTTPMethod, path, nil, nil)
+	err = req.Send()
+	if err != nil || req.HTTPResponse == nil {
+		err = fmt.Errorf("cannot send request")
+		return
+	}
+
+	body, err := ioutil.ReadAll(req.HTTPResponse.Body)
+	if err != nil || body == nil {
+		err = fmt.Errorf("cannot get response body")
+		return
+	}
+	log.Printf("FOS-fortios reading response: %s", string(body))
 
 	var result map[string]interface{}
 	json.Unmarshal([]byte(string(body)), &result)
@@ -277,6 +330,13 @@ func (c *FortiSDKClient) ReadFirewallObjectAddress(mkey string) (output *JSONFir
 			} else {
 				err = fmt.Errorf("status is %s and error no is not found", result["status"])
 			}
+
+			if result["http_status"] != nil {
+				err = fmt.Errorf("%s and http_status no is %.0f", err, result["http_status"])
+			} else {
+				err = fmt.Errorf("%s and and http_status no is not found", err)
+			}
+
 			return
 		}
 

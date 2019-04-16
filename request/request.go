@@ -6,7 +6,8 @@ import (
 	"log"
 	"bytes"
 	"fmt"
-	"github.com/fortios/fortios-sdk/config"
+	"time"
+	"github.com/fgtdev/fortios-sdk-go/config"
 )
 
 // Request describes the request to FortiOS service
@@ -64,15 +65,24 @@ func (r *Request) Send() error {
 		return err
 	}
 
-	resend:
-	//Send
-	rsp, err := r.Config.HTTPCon.Do(r.HTTPRequest)
-	r.HTTPResponse = rsp
-	if err != nil {
-		// log.Fatal(err)
-		err = fmt.Errorf("Error found: %s, will resend again", err)
+	retry := 0
+	for {
+		//Send
+		rsp, err := r.Config.HTTPCon.Do(r.HTTPRequest)
+		r.HTTPResponse = rsp
+		if err != nil {
+			if retry > 500 {
+				err = fmt.Errorf("Error found: %s, Connection failed for %s", err, u)
+				break
+			}
+			time.Sleep(time.Duration(1)*time.Second)
+			log.Printf("Error found: %s, will resend again %d", err, retry)
 
-		goto resend
+			retry++
+
+		} else {
+			break
+		}
 	}
 
 	return err

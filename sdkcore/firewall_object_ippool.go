@@ -52,8 +52,16 @@ func (c *FortiSDKClient) CreateFirewallObjectIPPool(params *JSONFirewallObjectIP
 	bytes := bytes.NewBuffer(locJSON)
 	req := c.NewRequest(HTTPMethod, path, nil, bytes)
 	err = req.Send()
+	if err != nil || req.HTTPResponse == nil {
+		err = fmt.Errorf("cannot send request")
+		return
+	}
 
 	body, err := ioutil.ReadAll(req.HTTPResponse.Body)
+	if err != nil || body == nil {
+		err = fmt.Errorf("cannot get response body")
+		return
+	}
 
 	var result map[string]interface{}
 	json.Unmarshal([]byte(string(body)), &result)
@@ -74,6 +82,13 @@ func (c *FortiSDKClient) CreateFirewallObjectIPPool(params *JSONFirewallObjectIP
 				} else {
 					err = fmt.Errorf("status is %s and error no is not found", result["status"])
 				}
+
+				if result["http_status"] != nil {
+					err = fmt.Errorf("%s and http_status no is %.0f", err, result["http_status"])
+				} else {
+					err = fmt.Errorf("%s and and http_status no is not found", err)
+				}
+
 				return
 			}
 			output.Status = result["status"].(string)
@@ -110,8 +125,16 @@ func (c *FortiSDKClient) UpdateFirewallObjectIPPool(params *JSONFirewallObjectIP
 	bytes := bytes.NewBuffer(locJSON)
 	req := c.NewRequest(HTTPMethod, path, nil, bytes)
 	err = req.Send()
+	if err != nil || req.HTTPResponse == nil {
+		err = fmt.Errorf("cannot send request")
+		return
+	}
 
 	body, err := ioutil.ReadAll(req.HTTPResponse.Body)
+	if err != nil || body == nil {
+		err = fmt.Errorf("cannot get response body")
+		return
+	}
 	log.Printf("FOS-fortios response: %s", string(body))
 
 	var result map[string]interface{}
@@ -133,6 +156,13 @@ func (c *FortiSDKClient) UpdateFirewallObjectIPPool(params *JSONFirewallObjectIP
 				} else {
 					err = fmt.Errorf("status is %s and error no is not found", result["status"])
 				}
+
+				if result["http_status"] != nil {
+					err = fmt.Errorf("%s and http_status no is %.0f", err, result["http_status"])
+				} else {
+					err = fmt.Errorf("%s and and http_status no is not found", err)
+				}
+
 				return
 			}
 			output.Status = result["status"].(string)
@@ -161,8 +191,16 @@ func (c *FortiSDKClient) DeleteFirewallObjectIPPool(mkey string) (err error) {
 
 	req := c.NewRequest(HTTPMethod, path, nil, nil)
 	err = req.Send()
+	if err != nil || req.HTTPResponse == nil {
+		err = fmt.Errorf("cannot send request")
+		return
+	}
 
 	body, err := ioutil.ReadAll(req.HTTPResponse.Body)
+	if err != nil || body == nil {
+		err = fmt.Errorf("cannot get response body")
+		return
+	}
 	log.Printf("FOS-fortios response: %s", string(body))
 
 	var result map[string]interface{}
@@ -182,6 +220,13 @@ func (c *FortiSDKClient) DeleteFirewallObjectIPPool(mkey string) (err error) {
 			} else {
 				err = fmt.Errorf("status is %s and error no is not found", result["status"])
 			}
+
+			if result["http_status"] != nil {
+				err = fmt.Errorf("%s and http_status no is %.0f", err, result["http_status"])
+			} else {
+				err = fmt.Errorf("%s and and http_status no is not found", err)
+			}
+
 			return
 		}
 
@@ -203,13 +248,22 @@ func (c *FortiSDKClient) ReadFirewallObjectIPPool(mkey string) (output *JSONFire
 	path := "/api/v2/cmdb/firewall/ippool"
 	path += "/" + mkey
 
+	output = &JSONFirewallObjectIPPool{}
+
 	req := c.NewRequest(HTTPMethod, path, nil, nil)
 	err = req.Send()
+	if err != nil || req.HTTPResponse == nil {
+		err = fmt.Errorf("cannot send request")
+		return
+	}
 
 	body, err := ioutil.ReadAll(req.HTTPResponse.Body)
+	if err != nil || body == nil {
+		err = fmt.Errorf("cannot get response body")
+		return
+	}
 	log.Printf("FOS-fortios reading response: %s", string(body))
 
-	output = &JSONFirewallObjectIPPool{}
 	var result map[string]interface{}
 	json.Unmarshal([]byte(string(body)), &result)
 
@@ -237,6 +291,13 @@ func (c *FortiSDKClient) ReadFirewallObjectIPPool(mkey string) (output *JSONFire
 			} else {
 				err = fmt.Errorf("status is %s and error no is not found", result["status"])
 			}
+
+			if result["http_status"] != nil {
+				err = fmt.Errorf("%s and http_status no is %.0f", err, result["http_status"])
+			} else {
+				err = fmt.Errorf("%s and and http_status no is not found", err)
+			}
+
 			return
 		}
 

@@ -60,8 +60,16 @@ func (c *FortiSDKClient) CreateSystemAPIUserSetting(params *JSONSystemAPIUserSet
 	bytes := bytes.NewBuffer(locJSON)
 	req := c.NewRequest(HTTPMethod, path, nil, bytes)
 	err = req.Send()
+	if err != nil || req.HTTPResponse == nil {
+		err = fmt.Errorf("cannot send request")
+		return
+	}
 
 	body, err := ioutil.ReadAll(req.HTTPResponse.Body)
+	if err != nil || body == nil {
+		err = fmt.Errorf("cannot get response body")
+		return
+	}
 
 	var result map[string]interface{}
 	json.Unmarshal([]byte(string(body)), &result)
@@ -82,6 +90,13 @@ func (c *FortiSDKClient) CreateSystemAPIUserSetting(params *JSONSystemAPIUserSet
 				} else {
 					err = fmt.Errorf("status is %s and error no is not found", result["status"])
 				}
+
+				if result["http_status"] != nil {
+					err = fmt.Errorf("%s and http_status no is %.0f", err, result["http_status"])
+				} else {
+					err = fmt.Errorf("%s and and http_status no is not found", err)
+				}
+
 				return
 			}
 			output.Status = result["status"].(string)
@@ -118,8 +133,16 @@ func (c *FortiSDKClient) UpdateSystemAPIUserSetting(params *JSONSystemAPIUserSet
 	bytes := bytes.NewBuffer(locJSON)
 	req := c.NewRequest(HTTPMethod, path, nil, bytes)
 	err = req.Send()
+	if err != nil || req.HTTPResponse == nil {
+		err = fmt.Errorf("cannot send request")
+		return
+	}
 
 	body, err := ioutil.ReadAll(req.HTTPResponse.Body)
+	if err != nil || body == nil {
+		err = fmt.Errorf("cannot get response body")
+		return
+	}
 	log.Printf("FOS-fortios response: %s", string(body))
 
 	var result map[string]interface{}
@@ -141,6 +164,13 @@ func (c *FortiSDKClient) UpdateSystemAPIUserSetting(params *JSONSystemAPIUserSet
 				} else {
 					err = fmt.Errorf("status is %s and error no is not found", result["status"])
 				}
+
+				if result["http_status"] != nil {
+					err = fmt.Errorf("%s and http_status no is %.0f", err, result["http_status"])
+				} else {
+					err = fmt.Errorf("%s and and http_status no is not found", err)
+				}
+
 				return
 			}
 			output.Status = result["status"].(string)
@@ -169,8 +199,16 @@ func (c *FortiSDKClient) DeleteSystemAPIUserSetting(mkey string) (err error) {
 
 	req := c.NewRequest(HTTPMethod, path, nil, nil)
 	err = req.Send()
+	if err != nil || req.HTTPResponse == nil {
+		err = fmt.Errorf("cannot send request")
+		return
+	}
 
 	body, err := ioutil.ReadAll(req.HTTPResponse.Body)
+	if err != nil || body == nil {
+		err = fmt.Errorf("cannot get response body")
+		return
+	}
 	log.Printf("FOS-fortios response: %s", string(body))
 
 	var result map[string]interface{}
@@ -190,6 +228,13 @@ func (c *FortiSDKClient) DeleteSystemAPIUserSetting(mkey string) (err error) {
 			} else {
 				err = fmt.Errorf("status is %s and error no is not found", result["status"])
 			}
+
+			if result["http_status"] != nil {
+				err = fmt.Errorf("%s and http_status no is %.0f", err, result["http_status"])
+			} else {
+				err = fmt.Errorf("%s and and http_status no is not found", err)
+			}
+
 			return
 		}
 
@@ -211,13 +256,22 @@ func (c *FortiSDKClient) ReadSystemAPIUserSetting(mkey string) (output *JSONSyst
 	path := "/api/v2/cmdb/system/api-user"
 	path += "/" + mkey
 
+	output = &JSONSystemAPIUserSetting{}
+
 	req := c.NewRequest(HTTPMethod, path, nil, nil)
 	err = req.Send()
+	if err != nil || req.HTTPResponse == nil {
+		err = fmt.Errorf("cannot send request")
+		return
+	}
 
 	body, err := ioutil.ReadAll(req.HTTPResponse.Body)
+	if err != nil || body == nil {
+		err = fmt.Errorf("cannot get response body")
+		return
+	}
 	log.Printf("FOS-fortios reading response: %s", string(body))
 
-	output = &JSONSystemAPIUserSetting{}
 	var result map[string]interface{}
 	json.Unmarshal([]byte(string(body)), &result)
 
@@ -245,6 +299,13 @@ func (c *FortiSDKClient) ReadSystemAPIUserSetting(mkey string) (output *JSONSyst
 			} else {
 				err = fmt.Errorf("status is %s and error no is not found", result["status"])
 			}
+
+			if result["http_status"] != nil {
+				err = fmt.Errorf("%s and http_status no is %.0f", err, result["http_status"])
+			} else {
+				err = fmt.Errorf("%s and and http_status no is not found", err)
+			}
+
 			return
 		}
 
@@ -276,7 +337,7 @@ func (c *FortiSDKClient) ReadSystemAPIUserSetting(mkey string) (output *JSONSyst
 			}
 			output.Vdom = members
 		}
-				
+
 		/*
 		if mapTmp["vdom"] != nil {
 

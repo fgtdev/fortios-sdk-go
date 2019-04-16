@@ -3,7 +3,7 @@ package config
 import (
 	"net/http"
 
-	"github.com/fortios/fortios-sdk/auth"
+	"github.com/fgtdev/fortios-sdk-go/auth"
 )
 
 // Config provides configuration to a FortiOS client instance

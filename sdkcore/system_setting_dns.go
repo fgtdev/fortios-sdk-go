@@ -99,8 +99,16 @@ func (c *FortiSDKClient) UpdateSystemSettingDNS(params *JSONSystemSettingDNS, mk
 	bytes := bytes.NewBuffer(locJSON)
 	req := c.NewRequest(HTTPMethod, path, nil, bytes)
 	err = req.Send()
+	if err != nil || req.HTTPResponse == nil {
+		err = fmt.Errorf("cannot send request")
+		return
+	}
 
 	body, err := ioutil.ReadAll(req.HTTPResponse.Body)
+	if err != nil || body == nil {
+		err = fmt.Errorf("cannot get response body")
+		return
+	}
 	log.Printf("FOS-fortios response: %s", string(body))
 
 	var result map[string]interface{}
@@ -122,6 +130,13 @@ func (c *FortiSDKClient) UpdateSystemSettingDNS(params *JSONSystemSettingDNS, mk
 				} else {
 					err = fmt.Errorf("status is %s and error no is not found", result["status"])
 				}
+
+				if result["http_status"] != nil {
+					err = fmt.Errorf("%s and http_status no is %.0f", err, result["http_status"])
+				} else {
+					err = fmt.Errorf("%s and and http_status no is not found", err)
+				}
+
 				return
 			}
 			output.Status = result["status"].(string)
@@ -162,12 +177,12 @@ func (c *FortiSDKClient) DeleteSystemSettingDNS(mkey string) (err error) {
 	// 		err = fmt.Errorf("cannot get the right response")
 	// 		return
 	// 	}
-	// 
+	//
 	// 	if result["status"] != "success" {
 	// 		err = fmt.Errorf("cannot get the right response")
 	// 		return
 	// 	}
-	// 
+	//
 	// } else {
 	// 	err = fmt.Errorf("cannot get the right response")
 	// 	return
@@ -185,13 +200,22 @@ func (c *FortiSDKClient) ReadSystemSettingDNS(mkey string) (output *JSONSystemSe
 	path := "/api/v2/cmdb/system/dns"
 	// path += "/" + mkey
 
+	output = &JSONSystemSettingDNS{}
+
 	req := c.NewRequest(HTTPMethod, path, nil, nil)
 	err = req.Send()
+	if err != nil || req.HTTPResponse == nil {
+		err = fmt.Errorf("cannot send request")
+		return
+	}
 
 	body, err := ioutil.ReadAll(req.HTTPResponse.Body)
+	if err != nil || body == nil {
+		err = fmt.Errorf("cannot get response body")
+		return
+	}
 	log.Printf("FOS-fortios reading response: %s", string(body))
 
-	output = &JSONSystemSettingDNS{}
 	var result map[string]interface{}
 	json.Unmarshal([]byte(string(body)), &result)
 
@@ -219,6 +243,13 @@ func (c *FortiSDKClient) ReadSystemSettingDNS(mkey string) (output *JSONSystemSe
 			} else {
 				err = fmt.Errorf("status is %s and error no is not found", result["status"])
 			}
+
+			if result["http_status"] != nil {
+				err = fmt.Errorf("%s and http_status no is %.0f", err, result["http_status"])
+			} else {
+				err = fmt.Errorf("%s and and http_status no is not found", err)
+			}
+
 			return
 		}
 

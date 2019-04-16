@@ -2,9 +2,9 @@ package forticlient
 
 import (
 	"net/http"
-	"github.com/fortios/fortios-sdk/config"
-	"github.com/fortios/fortios-sdk/auth"
-	"github.com/fortios/fortios-sdk/request"
+	"github.com/fgtdev/fortios-sdk-go/config"
+	"github.com/fgtdev/fortios-sdk-go/auth"
+	"github.com/fgtdev/fortios-sdk-go/request"
 	"bytes"
 	"encoding/json"
 	"fmt"
@@ -51,7 +51,7 @@ func NewClient(auth *auth.Auth, client *http.Client) *FortiSDKClient{
 	return c
 }
 
-// NewRequest creates the request to FortiOS for the client 
+// NewRequest creates the request to FortiOS for the client
 // and return it to the client
 func (c *FortiSDKClient) NewRequest(method string, path string, params interface{}, data *bytes.Buffer) *request.Request {
 	return request.New(c.Config, method, path, params, data);
@@ -79,7 +79,7 @@ func (c *FortiSDKClient) GetDeviceVersion() (version string, err error) {
 			err = fmt.Errorf("cannot get the right response")
 			return "", err
 		}
-		
+
 		if result["status"] != "success" {
 			err = fmt.Errorf("cannot get the right response")
 			return "", err
@@ -91,7 +91,7 @@ func (c *FortiSDKClient) GetDeviceVersion() (version string, err error) {
 		}
 
 		return result["version"].(string), err
-	} 
+	}
 
 	err = fmt.Errorf("cannot get the right response")
 	return "", err
