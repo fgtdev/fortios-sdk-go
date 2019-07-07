@@ -6,70 +6,49 @@ import (
 	"fmt"
 	"io/ioutil"
 	"log"
-	"strconv"
 )
 
-// JSONFirewallObjectServiceCommon contains the General parameters for Create and Update API function
-type JSONFirewallObjectServiceCommon struct {
-	Name           string `json:"name"`
-	Category       string `json:"category"`
-	Protocol       string `json:"protocol"`
-	Comment        string `json:"comment"`
-	ProtocolNumber string `json:"protocol-number"`
-	Icmptype       string `json:"icmptype"`
-	Icmpcode       string `json:"icmpcode"`
-	TCPPortrange   string `json:"tcp-portrange"`
-	UDPPortrange   string `json:"udp-portrange"`
-	SctpPortrange  string `json:"sctp-portrange"`
+// JSONFirewallObjectServiceCategoryItem contains the General parameters for Create and Update API function
+type JSONFirewallObjectServiceCategoryItem struct {
+	Name    string `json:"name"`
+	Comment string `json:"comment"`
 }
 
-// JSONFirewallObjectServiceFqdn contains the FQDN parameters for Create and Update API function
-type JSONFirewallObjectServiceFqdn struct {
-	Fqdn string `json:"fqdn"`
+// JSONFirewallObjectServiceCategory contains the parameters for Create and Update API function
+type JSONFirewallObjectServiceCategory struct {
+	*JSONFirewallObjectServiceCategoryItem
 }
 
-// JSONFirewallObjectServiceIprange contains the IP Range parameters for Create and Update API function
-type JSONFirewallObjectServiceIprange struct {
-	Iprange string `json:"iprange"`
-}
-
-// JSONFirewallObjectService contains the parameters for Create and Update API function
-type JSONFirewallObjectService struct {
-	*JSONFirewallObjectServiceCommon
-	*JSONFirewallObjectServiceFqdn
-	*JSONFirewallObjectServiceIprange
-}
-
-// JSONCreateFirewallObjectServiceOutput contains the output results for Create API function
-type JSONCreateFirewallObjectServiceOutput struct {
+// JSONCreateFirewallObjectServiceCategoryOutput contains the output results for Create API function
+type JSONCreateFirewallObjectServiceCategoryOutput struct {
 	Vdom       string  `json:"vdom"`
 	Mkey       string  `json:"mkey"`
 	Status     string  `json:"status"`
 	HTTPStatus float64 `json:"http_status"`
 }
 
-// JSONUpdateFirewallObjectServiceOutput contains the output results for Update API function
-// Attention: Considering scalability, the previous structure and the current structure may change differently
-type JSONUpdateFirewallObjectServiceOutput struct {
+// JSONUpdateFirewallObjectServiceCategoryOutput contains the output results for Update API function
+type JSONUpdateFirewallObjectServiceCategoryOutput struct {
 	Vdom       string  `json:"vdom"`
 	Mkey       string  `json:"mkey"`
 	Status     string  `json:"status"`
 	HTTPStatus float64 `json:"http_status"`
 }
 
-// CreateFirewallObjectService API operation for FortiOS creates a new firewall service.
-// Returns the index value of the firewall service and execution result when the request executes successfully.
+// CreateFirewallObjectServiceCategory API operation for FortiOS creates a new firewall service category.
+// Returns the index value of the firewall service category and execution result when the request executes successfully.
 // Returns error for service API and SDK errors.
-// See the firewal - service chapter in the FortiOS Handbook - CLI Reference.
-func (c *FortiSDKClient) CreateFirewallObjectService(params *JSONFirewallObjectService) (output *JSONCreateFirewallObjectServiceOutput, err error) {
+func (c *FortiSDKClient) CreateFirewallObjectServiceCategory(params *JSONFirewallObjectServiceCategory) (output *JSONCreateFirewallObjectServiceCategoryOutput, err error) {
 	HTTPMethod := "POST"
-	path := "/api/v2/cmdb/firewall.service/custom"
-	output = &JSONCreateFirewallObjectServiceOutput{}
+	path := "/api/v2/cmdb/firewall.service/category"
+	output = &JSONCreateFirewallObjectServiceCategoryOutput{}
 	locJSON, err := json.Marshal(params)
 	if err != nil {
 		log.Fatal(err)
 		return
 	}
+
+	log.Printf("POST: %s", string(locJSON))
 
 	bytes := bytes.NewBuffer(locJSON)
 	req := c.NewRequest(HTTPMethod, path, nil, bytes)
@@ -84,6 +63,9 @@ func (c *FortiSDKClient) CreateFirewallObjectService(params *JSONFirewallObjectS
 		err = fmt.Errorf("cannot get response body %s", err)
 		return
 	}
+	log.SetPrefix("CreateFirewallObjectServiceCategory")
+	log.Printf("Path called %s", path)
+	log.Printf("FortiOS response: %s", string(body))
 
 	var result map[string]interface{}
 	json.Unmarshal([]byte(string(body)), &result)
@@ -100,7 +82,11 @@ func (c *FortiSDKClient) CreateFirewallObjectService(params *JSONFirewallObjectS
 		if result["status"] != nil {
 			if result["status"] != "success" {
 				if result["error"] != nil {
-					err = fmt.Errorf("status is %s and error no is %.0f", result["status"], result["error"])
+					if result["error"] == -5 {
+						err = fmt.Errorf("Category %s already exists.", result["mkey"])
+					} else {
+						err = fmt.Errorf("status is %s and error no is %.0f", result["status"], result["error"])
+					}
 				} else {
 					err = fmt.Errorf("status is %s and error no is not found", result["status"])
 				}
@@ -129,15 +115,14 @@ func (c *FortiSDKClient) CreateFirewallObjectService(params *JSONFirewallObjectS
 	return
 }
 
-// UpdateFirewallObjectService API operation for FortiOS updates the specified firewall service.
+// UpdateFirewallObjectServiceCategory API operation for FortiOS updates the specified firewall service category.
 // Returns the index value of the firewall service and execution result when the request executes successfully.
 // Returns error for service API and SDK errors.
-// See the firewal - service chapter in the FortiOS Handbook - CLI Reference.
-func (c *FortiSDKClient) UpdateFirewallObjectService(params *JSONFirewallObjectService, mkey string) (output *JSONUpdateFirewallObjectServiceOutput, err error) {
+func (c *FortiSDKClient) UpdateFirewallObjectServiceCategory(params *JSONFirewallObjectServiceCategory, mkey string) (output *JSONUpdateFirewallObjectServiceCategoryOutput, err error) {
 	HTTPMethod := "PUT"
-	path := "/api/v2/cmdb/firewall.service/custom"
+	path := "/api/v2/cmdb/firewall.service/category"
 	path += "/" + EscapeURLString(mkey)
-	output = &JSONUpdateFirewallObjectServiceOutput{}
+	output = &JSONUpdateFirewallObjectServiceCategoryOutput{}
 	locJSON, err := json.Marshal(params)
 	if err != nil {
 		log.Fatal(err)
@@ -157,7 +142,8 @@ func (c *FortiSDKClient) UpdateFirewallObjectService(params *JSONFirewallObjectS
 		err = fmt.Errorf("cannot get response body %s", err)
 		return
 	}
-	log.Printf("FOS-fortios response: %s", string(body))
+	log.Printf("Path called %s", path)
+	log.Printf("FortiOS response: %s", string(body))
 
 	var result map[string]interface{}
 	json.Unmarshal([]byte(string(body)), &result)
@@ -203,12 +189,11 @@ func (c *FortiSDKClient) UpdateFirewallObjectService(params *JSONFirewallObjectS
 	return
 }
 
-// DeleteFirewallObjectService API operation for FortiOS deletes the specified firewall service.
+// DeleteFirewallObjectServiceCategory API operation for FortiOS deletes the specified firewall service category.
 // Returns error for service API and SDK errors.
-// See the firewal - service chapter in the FortiOS Handbook - CLI Reference.
-func (c *FortiSDKClient) DeleteFirewallObjectService(mkey string) (err error) {
+func (c *FortiSDKClient) DeleteFirewallObjectServiceCategory(mkey string) (err error) {
 	HTTPMethod := "DELETE"
-	path := "/api/v2/cmdb/firewall.service/custom"
+	path := "/api/v2/cmdb/firewall.service/category"
 	path += "/" + EscapeURLString(mkey)
 
 	req := c.NewRequest(HTTPMethod, path, nil, nil)
@@ -223,7 +208,9 @@ func (c *FortiSDKClient) DeleteFirewallObjectService(mkey string) (err error) {
 		err = fmt.Errorf("cannot get response body %s", err)
 		return
 	}
-	log.Printf("FOS-fortios response: %s", string(body))
+
+	log.Printf("Path called %s", path)
+	log.Printf("FortiOS response: %s", string(body))
 
 	var result map[string]interface{}
 	json.Unmarshal([]byte(string(body)), &result)
@@ -260,24 +247,18 @@ func (c *FortiSDKClient) DeleteFirewallObjectService(mkey string) (err error) {
 	return
 }
 
-// ReadFirewallObjectService API operation for FortiOS gets the firewall service
+// ReadFirewallObjectServiceCategory API operation for FortiOS gets the firewall service category
 // with the specified index value.
-// Returns the requested firewall service value when the request executes successfully.
 // Returns error for service API and SDK errors.
-// See the firewal - service chapter in the FortiOS Handbook - CLI Reference.
-func (c *FortiSDKClient) ReadFirewallObjectService(mkey string) (output *JSONFirewallObjectService, err error) {
+func (c *FortiSDKClient) ReadFirewallObjectServiceCategory(mkey string) (output *JSONFirewallObjectServiceCategory, err error) {
 	HTTPMethod := "GET"
-	path := "/api/v2/cmdb/firewall.service/custom"
+	path := "/api/v2/cmdb/firewall.service/category"
 	path += "/" + EscapeURLString(mkey)
 
-	j1 := JSONFirewallObjectServiceCommon{}
-	j2 := JSONFirewallObjectServiceFqdn{}
-	j3 := JSONFirewallObjectServiceIprange{}
+	j1 := JSONFirewallObjectServiceCategoryItem{}
 
-	output = &JSONFirewallObjectService{
-		JSONFirewallObjectServiceCommon:  &j1,
-		JSONFirewallObjectServiceFqdn:    &j2,
-		JSONFirewallObjectServiceIprange: &j3,
+	output = &JSONFirewallObjectServiceCategory{
+		JSONFirewallObjectServiceCategoryItem: &j1,
 	}
 
 	req := c.NewRequest(HTTPMethod, path, nil, nil)
@@ -292,7 +273,9 @@ func (c *FortiSDKClient) ReadFirewallObjectService(mkey string) (output *JSONFir
 		err = fmt.Errorf("cannot get response body %s", err)
 		return
 	}
-	log.Printf("FOS-fortios reading response: %s", string(body))
+	log.SetPrefix("ReadFirewallObjectServiceCategory")
+	log.Printf("Path called %s", path)
+	log.Printf("FortiOS response: %s", string(body))
 
 	var result map[string]interface{}
 	json.Unmarshal([]byte(string(body)), &result)
@@ -341,57 +324,10 @@ func (c *FortiSDKClient) ReadFirewallObjectService(mkey string) (output *JSONFir
 		if mapTmp["name"] != nil {
 			output.Name = mapTmp["name"].(string)
 		}
-		if mapTmp["category"] != nil {
-			output.Category = mapTmp["category"].(string)
-		}
-		if mapTmp["protocol"] != nil {
-			output.Protocol = mapTmp["protocol"].(string)
-		}
-		if mapTmp["fqdn"] != nil {
-			output.Fqdn = mapTmp["fqdn"].(string)
-		}
-		if mapTmp["iprange"] != nil {
-			output.Iprange = mapTmp["iprange"].(string)
-		}
 		if mapTmp["comment"] != nil {
 			output.Comment = mapTmp["comment"].(string)
 		}
-		if mapTmp["protocol-number"] != nil {
-			output.ProtocolNumber = strconv.Itoa(int(mapTmp["protocol-number"].(float64)))
-		}
 
-		if output.Protocol == "ICMP" {
-			if mapTmp["icmptype"] != nil {
-				if mapTmp["icmptype"] != "" {
-					output.Icmptype = strconv.Itoa(int(mapTmp["icmptype"].(float64)))
-				} else {
-					output.Icmptype = ""
-				}
-			}
-			if mapTmp["icmpcode"] != nil {
-				if mapTmp["icmpcode"] != "" {
-					output.Icmpcode = strconv.Itoa(int(mapTmp["icmpcode"].(float64)))
-				} else {
-					output.Icmpcode = ""
-				}
-			}
-		} else {
-			if mapTmp["icmptype"] != nil {
-				output.Icmptype = mapTmp["icmptype"].(string)
-			}
-			if mapTmp["icmpcode"] != nil {
-				output.Icmpcode = mapTmp["icmpcode"].(string)
-			}
-		}
-		if mapTmp["tcp-portrange"] != nil {
-			output.TCPPortrange = mapTmp["tcp-portrange"].(string)
-		}
-		if mapTmp["udp-portrange"] != nil {
-			output.UDPPortrange = mapTmp["udp-portrange"].(string)
-		}
-		if mapTmp["sctp-portrange"] != nil {
-			output.SctpPortrange = mapTmp["sctp-portrange"].(string)
-		}
 	} else {
 		err = fmt.Errorf("cannot get the right response")
 		return
