@@ -279,7 +279,7 @@ func (c *FortiSDKClient) ReadSystemSettingGlobal(mkey string) (output *JSONSyste
 		if mapTmp["admin-ssh-port"] != nil {
 			output.AdminSSHPort = strconv.Itoa(int(mapTmp["admin-ssh-port"].(float64)))
 		}
-
+		
 	} else {
 		err = fmt.Errorf("cannot get the right response")
 		return
